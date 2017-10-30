@@ -5,6 +5,7 @@ import javax.annotation.Resource;
 import com.alibaba.fastjson.JSONObject;
 import com.qqlei.zhongjiaxin.cache.producer.model.ProductInfo;
 import com.qqlei.zhongjiaxin.cache.producer.model.ShopInfo;
+import com.qqlei.zhongjiaxin.cache.producer.prewarm.CachePrewarmThread;
 import com.qqlei.zhongjiaxin.cache.producer.rebuild.RebuildCacheQueue;
 import com.qqlei.zhongjiaxin.cache.producer.service.CacheService;
 import org.springframework.stereotype.Controller;
@@ -75,9 +76,16 @@ public class CacheController {
 		}
 
 		if(shopInfo == null) {
-			// 就需要从数据源重新拉去数据，重建缓存，但是这里先不讲
+			String shopInfoJSON = "{\"id\":"+shopId+", \"name\": \"手机店铺\", \"level\": 1, \"goodCommentRate\":\"5\"}";
+			shopInfo = JSONObject.parseObject(shopInfoJSON, ShopInfo.class);
 		}
 
 		return shopInfo;
+	}
+
+	@RequestMapping("/prewarmCache")
+	@ResponseBody
+	public void prewarmCache() {
+		new Thread(new CachePrewarmThread()).start();
 	}
 }

@@ -1,6 +1,7 @@
 package com.qqlei.zhongjiaxin.cache.producer.zk;
 
 import org.apache.zookeeper.*;
+import org.apache.zookeeper.data.Stat;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -63,18 +64,63 @@ public class ZooKeeperSession {
 			int count = 0;
 			while(true) {
 				try {
-					Thread.sleep(20); 
+					Thread.sleep(1000);
 					zookeeper.create(path, "".getBytes(), 
 							ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
 				} catch (Exception e2) {
-					e2.printStackTrace();
 					count++;
+					System.out.println("the " + count + " times try to acquire lock for product[id=" + productId + "]......");
 					continue;
 				}
 				System.out.println("success to acquire lock for product[id=" + productId + "] after " + count + " times try......");
 				break;
 			}
 		}
+	}
+
+	/**
+	 * 获取分布式锁
+	 * @param path
+	 */
+	public void acquireDistributedLock(String path) {
+		try {
+			zookeeper.create(path, "".getBytes(),
+					ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+			System.out.println("success to acquire lock for " + path);
+		} catch (Exception e) {
+			// 如果那个商品对应的锁的node，已经存在了，就是已经被别人加锁了，那么就这里就会报错
+			// NodeExistsException
+			int count = 0;
+			while(true) {
+				try {
+					Thread.sleep(1000);
+					zookeeper.create(path, "".getBytes(),
+							ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+				} catch (Exception e2) {
+					count++;
+					System.out.println("the " + count + " times try to acquire lock for " + path + "......");
+					continue;
+				}
+				System.out.println("success to acquire lock for " + path + " after " + count + " times try......");
+				break;
+			}
+		}
+	}
+
+	/**
+	 * 获取分布式锁
+	 * @param path
+	 */
+	public boolean acquireFastFailedDistributedLock(String path) {
+		try {
+			zookeeper.create(path, "".getBytes(),
+					ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+			System.out.println("success to acquire lock for " + path);
+			return true;
+		} catch (Exception e) {
+			System.out.println("fail to acquire lock for " + path);
+		}
+		return false;
 	}
 	
 	/**
@@ -89,6 +135,39 @@ public class ZooKeeperSession {
 			e.printStackTrace();
 		}
 	}
+	/**
+	 * 释放掉一个分布式锁
+	 * @param path
+	 */
+	public void releaseDistributedLock(String path) {
+		try {
+			zookeeper.delete(path, -1);
+			System.out.println("release the lock for " + path + "......");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public String getNodeData(String path) {
+		try {
+			if(zookeeper.exists(path,true) ==null){
+				return "";
+			}
+			return new String(zookeeper.getData(path, false, new Stat()));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
+
+	public void setNodeData(String path, String data) {
+		try {
+			zookeeper.setData(path, data.getBytes(), -1);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	
 	/**
 	 * 建立zk session的watcher
