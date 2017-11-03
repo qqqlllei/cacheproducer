@@ -1,4 +1,5 @@
 package com.qqlei.zhongjiaxin.cache.producer;
+import com.qqlei.zhongjiaxin.cache.producer.filter.HystrixRequestContextFilter;
 import com.qqlei.zhongjiaxin.cache.producer.listener.InitListener;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -7,6 +8,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.boot.context.embedded.ServletListenerRegistrationBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -63,6 +65,14 @@ public class Application {
         servletListenerRegistrationBean.setListener(new InitListener());
         return servletListenerRegistrationBean;
     }
+
+//    @Bean
+//    public FilterRegistrationBean filterRegistrationBean() {
+//        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(
+//                new HystrixRequestContextFilter());
+//        filterRegistrationBean.addUrlPatterns("/*");
+//        return filterRegistrationBean;
+//    }
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
