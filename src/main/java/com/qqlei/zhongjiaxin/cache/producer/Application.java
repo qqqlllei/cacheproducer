@@ -66,13 +66,13 @@ public class Application {
         return servletListenerRegistrationBean;
     }
 
-//    @Bean
-//    public FilterRegistrationBean filterRegistrationBean() {
-//        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(
-//                new HystrixRequestContextFilter());
-//        filterRegistrationBean.addUrlPatterns("/*");
-//        return filterRegistrationBean;
-//    }
+    @Bean
+    public FilterRegistrationBean filterRegistrationBean() {
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(
+                new HystrixRequestContextFilter());
+        filterRegistrationBean.addUrlPatterns("/*");
+        return filterRegistrationBean;
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);

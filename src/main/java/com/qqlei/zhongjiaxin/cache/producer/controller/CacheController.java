@@ -5,6 +5,7 @@ import com.netflix.hystrix.HystrixCommand;
 import com.qqlei.zhongjiaxin.cache.producer.command.GetBrandNameCommand;
 import com.qqlei.zhongjiaxin.cache.producer.command.GetCityNameCommand;
 import com.qqlei.zhongjiaxin.cache.producer.command.GetProductInfoCommand;
+import com.qqlei.zhongjiaxin.cache.producer.command.GetProductInfosCollapser;
 import com.qqlei.zhongjiaxin.cache.producer.model.ProductInfo;
 import com.qqlei.zhongjiaxin.cache.producer.model.ShopInfo;
 import com.qqlei.zhongjiaxin.cache.producer.prewarm.CachePrewarmThread;
@@ -15,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Future;
 
 /**
  * 缓存Controller
@@ -64,9 +68,6 @@ public class CacheController {
 			//通过hysrtix做资源隔离
 			HystrixCommand<ProductInfo> getProductInfoCommand = new GetProductInfoCommand(productId);
 			productInfo = getProductInfoCommand.execute();
-			System.out.println("=================从业务服务中获取缓存，商品信息productInfo=" + productInfo);
-
-
 			//这次请求会从hystrix缓存里取值
 //			HystrixCommand<ProductInfo> getProductInfoCommand2 = new GetProductInfoCommand(productId);
 //			ProductInfo productInfo2  = getProductInfoCommand2.execute();
@@ -108,6 +109,24 @@ public class CacheController {
 		}
 
 		return shopInfo;
+	}
+
+	@RequestMapping("/getProductInfos")
+	@ResponseBody
+	public String getProductInfos(String productIds) {
+		List<Future<ProductInfo>> futures = new ArrayList<>();
+		for (String productId:productIds.split(",")) {
+			GetProductInfosCollapser collapser = new GetProductInfosCollapser(Long.valueOf(productId));
+			futures.add(collapser.queue());
+		}
+		try {
+			for (Future<ProductInfo> future : futures) {
+				System.out.println("CacheController的结果：" + future.get());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return "success";
 	}
 
 	@RequestMapping("/prewarmCache")
