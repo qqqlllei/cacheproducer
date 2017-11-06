@@ -25,4 +25,9 @@ public class SaveProductInfo2ReidsCacheCommand extends HystrixCommand<Boolean> {
         jedisCluster.set(key, JSONObject.toJSONString(productInfo));
         return true;
     }
+
+    @Override
+    protected Boolean getFallback() {
+        return false;
+    }
 }

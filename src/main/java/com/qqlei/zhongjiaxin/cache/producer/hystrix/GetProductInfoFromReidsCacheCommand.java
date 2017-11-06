@@ -29,4 +29,9 @@ public class GetProductInfoFromReidsCacheCommand extends HystrixCommand<ProductI
         }
         return null;
     }
+
+    @Override
+    protected ProductInfo getFallback() {
+        return null;
+    }
 }
