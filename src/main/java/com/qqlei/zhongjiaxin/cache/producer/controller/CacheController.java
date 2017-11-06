@@ -2,10 +2,7 @@ package com.qqlei.zhongjiaxin.cache.producer.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.netflix.hystrix.HystrixCommand;
-import com.qqlei.zhongjiaxin.cache.producer.command.GetBrandNameCommand;
-import com.qqlei.zhongjiaxin.cache.producer.command.GetCityNameCommand;
-import com.qqlei.zhongjiaxin.cache.producer.command.GetProductInfoCommand;
-import com.qqlei.zhongjiaxin.cache.producer.command.GetProductInfosCollapser;
+import com.qqlei.zhongjiaxin.cache.producer.command.*;
 import com.qqlei.zhongjiaxin.cache.producer.model.ProductInfo;
 import com.qqlei.zhongjiaxin.cache.producer.model.ShopInfo;
 import com.qqlei.zhongjiaxin.cache.producer.prewarm.CachePrewarmThread;
@@ -66,13 +63,15 @@ public class CacheController {
 //			productInfo = JSONObject.parseObject(response, ProductInfo.class);
 
 			//通过hysrtix做资源隔离
-			HystrixCommand<ProductInfo> getProductInfoCommand = new GetProductInfoCommand(productId);
-			productInfo = getProductInfoCommand.execute();
+//			GetProductInfoCommand getProductInfoCommand = new GetProductInfoCommand(productId);
+//			productInfo = getProductInfoCommand.execute();
 			//这次请求会从hystrix缓存里取值
 //			HystrixCommand<ProductInfo> getProductInfoCommand2 = new GetProductInfoCommand(productId);
 //			ProductInfo productInfo2  = getProductInfoCommand2.execute();
 //			System.out.println("=================从业务服务中获取缓存，商品信息productInfo2=" + productInfo2);
 
+			GetProductInfoFacadeCommand getProductInfoFacadeCommand = new GetProductInfoFacadeCommand(productId);
+			productInfo = getProductInfoFacadeCommand.execute();
 
 			GetCityNameCommand getCityNameCommand = new GetCityNameCommand(productInfo.getCityId());
 			String cityName = getCityNameCommand.execute();
@@ -126,6 +125,14 @@ public class CacheController {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return "success";
+	}
+
+
+	@RequestMapping("/degrade")
+	@ResponseBody
+	public String degrade(){
+		IsDegrade.setDegrade(true);
 		return "success";
 	}
 
