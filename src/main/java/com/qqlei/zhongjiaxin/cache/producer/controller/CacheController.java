@@ -47,13 +47,13 @@ public class CacheController {
 	public ProductInfo getProductInfo(Long productId) {
 		ProductInfo productInfo = null;
 
-//		productInfo = cacheService.getProductInfoFromReidsCache(productId);
-//		System.out.println("=================从redis中获取缓存，商品信息=" + productInfo);
-//
-//		if(productInfo == null) {
-//			productInfo = cacheService.getProductInfoFromLocalCache(productId);
-//			System.out.println("=================从ehcache中获取缓存，商品信息=" + productInfo);
-//		}
+		productInfo = cacheService.getProductInfoFromReidsCache(productId);
+		System.out.println("=================从redis中获取缓存，商品信息=" + productInfo);
+
+		if(productInfo == null) {
+			productInfo = cacheService.getProductInfoFromLocalCache(productId);
+			System.out.println("=================从ehcache中获取缓存，商品信息=" + productInfo);
+		}
 
 		if(productInfo == null) {
 			// 去业务服务拉去数据
@@ -63,15 +63,15 @@ public class CacheController {
 //			productInfo = JSONObject.parseObject(response, ProductInfo.class);
 
 			//通过hysrtix做资源隔离
-//			GetProductInfoCommand getProductInfoCommand = new GetProductInfoCommand(productId);
-//			productInfo = getProductInfoCommand.execute();
+			GetProductInfoCommand getProductInfoCommand = new GetProductInfoCommand(productId);
+			productInfo = getProductInfoCommand.execute();
 			//这次请求会从hystrix缓存里取值
 //			HystrixCommand<ProductInfo> getProductInfoCommand2 = new GetProductInfoCommand(productId);
 //			ProductInfo productInfo2  = getProductInfoCommand2.execute();
 //			System.out.println("=================从业务服务中获取缓存，商品信息productInfo2=" + productInfo2);
 
-			GetProductInfoFacadeCommand getProductInfoFacadeCommand = new GetProductInfoFacadeCommand(productId);
-			productInfo = getProductInfoFacadeCommand.execute();
+//			GetProductInfoFacadeCommand getProductInfoFacadeCommand = new GetProductInfoFacadeCommand(productId);
+//			productInfo = getProductInfoFacadeCommand.execute();
 
 			GetCityNameCommand getCityNameCommand = new GetCityNameCommand(productInfo.getCityId());
 			String cityName = getCityNameCommand.execute();

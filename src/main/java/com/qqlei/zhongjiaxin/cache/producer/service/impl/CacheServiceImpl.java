@@ -1,6 +1,10 @@
 package com.qqlei.zhongjiaxin.cache.producer.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.qqlei.zhongjiaxin.cache.producer.hystrix.GetProductInfoFromReidsCacheCommand;
+import com.qqlei.zhongjiaxin.cache.producer.hystrix.GetShopInfoFromReidsCacheCommand;
+import com.qqlei.zhongjiaxin.cache.producer.hystrix.SaveProductInfo2ReidsCacheCommand;
+import com.qqlei.zhongjiaxin.cache.producer.hystrix.SaveShopInfo2ReidsCacheCommand;
 import com.qqlei.zhongjiaxin.cache.producer.model.ProductInfo;
 import com.qqlei.zhongjiaxin.cache.producer.model.ShopInfo;
 import com.qqlei.zhongjiaxin.cache.producer.service.CacheService;
@@ -95,8 +99,9 @@ public class CacheServiceImpl implements CacheService {
 	 */
 	@Override
 	public void saveProductInfo2ReidsCache(ProductInfo productInfo) {
-		String key = "product_info_" + productInfo.getId();
-		jedisCluster.set(key, JSONObject.toJSONString(productInfo));
+
+		SaveProductInfo2ReidsCacheCommand saveProductInfo2ReidsCacheCommand = new SaveProductInfo2ReidsCacheCommand(productInfo);
+		saveProductInfo2ReidsCacheCommand.execute();
 	}
 
 	/**
@@ -105,8 +110,9 @@ public class CacheServiceImpl implements CacheService {
 	 */
 	@Override
 	public void saveShopInfo2ReidsCache(ShopInfo shopInfo) {
-		String key = "shop_info_" + shopInfo.getId();
-		jedisCluster.set(key, JSONObject.toJSONString(shopInfo));
+
+		SaveShopInfo2ReidsCacheCommand saveShopInfo2ReidsCacheCommand = new SaveShopInfo2ReidsCacheCommand(shopInfo);
+		saveShopInfo2ReidsCacheCommand.execute();
 	}
 
 	/**
@@ -114,9 +120,8 @@ public class CacheServiceImpl implements CacheService {
 	 * @param productId
 	 */
 	public ProductInfo getProductInfoFromReidsCache(Long productId) {
-		String key = "product_info_" + productId;
-		String json = jedisCluster.get(key);
-		return JSONObject.parseObject(json, ProductInfo.class);
+		GetProductInfoFromReidsCacheCommand getProductInfoFromReidsCacheCommand = new GetProductInfoFromReidsCacheCommand(productId);
+		return getProductInfoFromReidsCacheCommand.execute();
 	}
 
 	/**
@@ -124,9 +129,8 @@ public class CacheServiceImpl implements CacheService {
 	 * @param shopId
 	 */
 	public ShopInfo getShopInfoFromReidsCache(Long shopId) {
-		String key = "shop_info_" + shopId;
-		String json = jedisCluster.get(key);
-		return JSONObject.parseObject(json, ShopInfo.class);
+		GetShopInfoFromReidsCacheCommand getShopInfoFromReidsCacheCommand = new GetShopInfoFromReidsCacheCommand(shopId);
+		return getShopInfoFromReidsCacheCommand.execute();
 	}
 
 
